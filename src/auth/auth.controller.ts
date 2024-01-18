@@ -6,10 +6,10 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { Response } from 'express';
 import { RegistrationGuard } from './guards/auth.guard';
+import { UsersService } from 'src/users';
+import { CreateUserDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
