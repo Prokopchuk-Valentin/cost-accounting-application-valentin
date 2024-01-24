@@ -29,7 +29,7 @@ export class UsersService {
   }
 
   async login(loginUserDto: LoginUserDto): Promise<User | null> {
-    return loginUserDto;
+    return await this.findOne(loginUserDto.userName);
   }
 
   async HashPassword(password: string): Promise<string> {

@@ -19,7 +19,7 @@ export class RegistrationGuard implements CanActivate {
 
     const { userName } = request.body;
 
-    const user = await this.authService.ValidateUsers(userName);
+    const user = await this.authService.validateUsers(userName);
 
     if (user) {
       throw new UnauthorizedException(
