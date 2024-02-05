@@ -1,49 +1,73 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
+  HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { RegistrationGuard, LoginGuard } from './guards/';
-import { UsersService } from 'src/users';
-import { CreateUserDto, LoginUserDto } from './dto';
-import { AuthService } from './auth.service';
+import { CostsService } from './costs.service';
+import { AuthService } from 'src/auth';
+import { JWTGuard } from 'src/auth/guards/jwt.guard';
+import { CreateCostDto, UpdateCostDto } from './dto';
 
-@Controller('auth')
-export class AuthController {
+@Controller('cost')
+export class CostsController {
   constructor(
-    private usersService: UsersService,
-    private authService: AuthService,
+    private readonly costsService: CostsService,
+    private readonly authService: AuthService,
   ) {}
 
-  @UseGuards(LoginGuard)
-  @Post('login')
-  async loginUser(@Body() loginUserDto: LoginUserDto, @Res() res: Response) {
-    const user = await this.usersService.login(loginUserDto);
+  @UseGuards(JWTGuard)
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async getAllCosts(@Req() req, @Res() res) {
+    const user = await this.authService.getUserByTokenData(req.token);
+    const costs = await this.costsService.findAll(user._id.toString());
 
-    const { userName } = user;
-    res.statusCode = HttpStatus.OK;
-
-    const { access_token: accessToken } =
-      await this.authService.generateAccessToken(user);
-
-    const { refresh_token: refreshToken } =
-      await this.authService.generateRefreshToken(user._id as string);
-    return res.send({ userName, accessToken, refreshToken });
+    return res.send(costs);
   }
 
-  @UseGuards(RegistrationGuard)
-  @Post('registration')
-  async registrationUser(
-    @Body() createUserDto: CreateUserDto,
-    @Res() res: Response,
-  ) {
-    await this.usersService.registration(createUserDto);
-    res.statusCode = HttpStatus.CREATED;
+  @UseGuards(JWTGuard)
+  @Post()
+  @HttpCode(HttpStatus.OK)
+  async createCost(@Body() createCostDto: CreateCostDto, @Req() req) {
+    const user = await this.authService.getUserByTokenData(req.token);
 
-    return res.send('user created');
+    return await this.costsService.create({
+      ...createCostDto,
+      userId: user._id.toString(),
+    });
+  }
+
+  @UseGuards(JWTGuard)
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  async updateCost(
+    @Body() updateCostDto: UpdateCostDto,
+    @Param('id') id: string,
+  ) {
+    return await this.costsService.update(updateCostDto, id);
+  }
+
+  @UseGuards(JWTGuard)
+  @Delete('deleteAll')
+  @HttpCode(HttpStatus.OK)
+  async deleteAllCost(@Req() req) {
+    const user = await this.authService.getUserByTokenData(req.token);
+    return await this.costsService.deleteAll(user._id.toString());
+  }
+
+  @UseGuards(JWTGuard)
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deleteCost(@Param('id') id: string) {
+    return await this.costsService.deleteOne(id);
   }
 }

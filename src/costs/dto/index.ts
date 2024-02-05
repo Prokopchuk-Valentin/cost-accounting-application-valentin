@@ -1,2 +1,2 @@
-export * from './create-costs.dto';
+export * from './create-cost.dto';
 export * from './update-costs.dto';

@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class CreateCostrDto {
+export class CreateCostDto {
   @IsNotEmpty()
   readonly text: string;
 

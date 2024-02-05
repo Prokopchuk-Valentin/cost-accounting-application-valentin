@@ -1,20 +1,16 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from 'src/users';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
+import { MongooseModule } from '@nestjs/mongoose';
+import { CostsService } from './costs.service';
+import { Cost, CostsSchema } from 'src/schemas/costs.schemas';
+import { AuthModule } from 'src/auth';
+import { CostsController } from './costs.controller';
 
 @Module({
   imports: [
-    UsersModule,
-    JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '30s' },
-    }),
+    MongooseModule.forFeature([{ name: Cost.name, schema: CostsSchema }]),
+    AuthModule,
   ],
-  controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [CostsService],
+  controllers: [CostsController],
 })
-export class AuthModule {}
+export class CostsModule {}
